@@ -1,0 +1,1 @@
+Pralaya-DB is a solution designed for efficient and reliable database backup and recovery. It typically includes features that help automate backup processes, manage versions, ensure data integrity, and support various DBMSs.

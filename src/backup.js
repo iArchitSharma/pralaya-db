@@ -55,4 +55,6 @@ function createBackup(dbType, config, outputFile) {
   }
 }
 
-module.exports = { createBackup };
+export default {
+  createBackup
+};

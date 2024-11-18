@@ -1,3 +1,5 @@
+import winston from "winston";
+
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
@@ -20,7 +22,6 @@ const logger = winston.createLogger({
   });
   
   /**
-   * Logs a backup activity.
    * @param {string} message - Log message.
    * @param {string} level - Log level (info, error, warn).
    */
@@ -29,11 +30,10 @@ const logger = winston.createLogger({
   }
   
   /**
-   * Logs an error with additional details.
    * @param {Error} error - Error object.
    */
   function logError(error) {
-    logger.error(error.stack || error.message);
+    logger.error(error?.message || error || "Unknown error");
   }
   
-  module.exports = { logMessage, logError, logger };
+  export { logMessage, logError, logger };

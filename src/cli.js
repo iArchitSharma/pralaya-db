@@ -1,40 +1,45 @@
 import yargs from "yargs";
-import { hideBin } from "yargs";
-import { createBackup } from './backup';
-import { restoreBackup } from './restore';
-import { logMessage, logError } from './utils/logger';
+import { hideBin } from "yargs/helpers";
+import { createBackup } from "./backup.js";
+import { restoreBackup } from "./restore.js";
+import { logMessage, logError } from "./utils/logger.js";
+import fs from "fs";
+
+/**
+ * Load configuration file dynamically using fs.
+ * @param {string} configPath - Path to the configuration JSON file.
+ * @returns {object} Parsed configuration object.
+ */
+function loadConfig(configPath) {
+  try {
+    const rawData = fs.readFileSync(configPath, "utf8");
+    return JSON.parse(rawData);
+  } catch (err) {
+    logError(`Error loading configuration file: ${err.message}`);
+    process.exit(1); 
+  }
+}
 
 yargs(hideBin(process.argv))
-  .scriptName('pralaya-db')
-  .usage('$0 <command> [options]')
   .command(
-    'backup',
-    'Create a database backup',
+    "backup",
+    "Create a backup of the database",
     (yargs) => {
-      return yargs
-        .option('dbType', {
-          alias: 'd',
-          type: 'string',
+      yargs
+        .option("dbType", { describe: "Database type", demandOption: true })
+        .option("config", {
+          describe: "Path to DB config file",
           demandOption: true,
-          describe: 'Type of database (mysql, postgres, mongodb, sqlite)',
         })
-        .option('config', {
-          alias: 'c',
-          type: 'string',
+        .option("output", {
+          describe: "Path for the backup file",
           demandOption: true,
-          describe: 'Path to JSON config file with database connection details',
-        })
-        .option('output', {
-          alias: 'o',
-          type: 'string',
-          demandOption: true,
-          describe: 'Output file path for the backup',
         });
     },
     async (argv) => {
       try {
-        const config = require(argv.config);
-        createBackup(argv.dbType, config, argv.output);
+        const config = loadConfig(argv.config);
+        await createBackup(argv.dbType, config, argv.output);
         logMessage(`Backup started for ${argv.dbType} database.`);
       } catch (err) {
         logError(err);
@@ -42,86 +47,46 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    'restore',
-    'Restore a database from a backup',
+    "restore",
+    "Restore a database from a backup",
     (yargs) => {
-      return yargs
-        .option('dbType', {
-          alias: 'd',
-          type: 'string',
+      yargs
+        .option("dbType", { describe: "Database type", demandOption: true })
+        .option("config", {
+          describe: "Path to DB config file",
           demandOption: true,
-          describe: 'Type of database (mysql, postgres, mongodb, sqlite)',
         })
-        .option('config', {
-          alias: 'c',
-          type: 'string',
+        .option("backup", {
+          describe: "Path to the backup file",
           demandOption: true,
-          describe: 'Path to JSON config file with database connection details',
-        })
-        .option('backup', {
-          alias: 'b',
-          type: 'string',
-          demandOption: true,
-          describe: 'Path to the backup file to restore from',
         });
     },
     async (argv) => {
-      try {
-        const config = require(argv.config);
-        restoreBackup(argv.dbType, argv.backup, config);
-        logMessage(`Restore started for ${argv.dbType} database.`);
-      } catch (err) {
-        logError(err);
-      }
+      const config = loadConfig(argv.config);
+      await restoreBackup(argv.dbType, argv.backup, config);
+      logMessage(`Restore started for ${argv.dbType} database.`);
     }
   )
   .command(
-    'schedule',
-    'Schedule recurring database backups',
+    "schedule",
+    "Schedule periodic database backups",
     (yargs) => {
-      return yargs
-        .option('cron', {
-          alias: 'x',
-          type: 'string',
+      yargs
+        .option("cron", { describe: "Cron expression", demandOption: true })
+        .option("dbType", { describe: "Database type", demandOption: true })
+        .option("config", {
+          describe: "Path to DB config file",
           demandOption: true,
-          describe: 'Cron expression for scheduling the backup',
         })
-        .option('dbType', {
-          alias: 'd',
-          type: 'string',
+        .option("output", {
+          describe: "Path for the backup file",
           demandOption: true,
-          describe: 'Type of database (mysql, postgres, mongodb, sqlite)',
-        })
-        .option('config', {
-          alias: 'c',
-          type: 'string',
-          demandOption: true,
-          describe: 'Path to JSON config file with database connection details',
-        })
-        .option('output', {
-          alias: 'o',
-          type: 'string',
-          demandOption: true,
-          describe: 'Output file path for the backup',
         });
     },
-    (argv) => {
-      try {
-        const config = require(argv.config);
-        const task = scheduleBackup(argv.cron, argv.dbType, config, argv.output);
-        logMessage(`Backup scheduled for ${argv.dbType} database.`);
-        console.log(
-          'Use "CTRL+C" to exit, or manually stop the process when needed.'
-        );
-      } catch (err) {
-        logError(err);
-      }
+    async (argv) => {
+      const config = loadConfig(argv.config);
+      await scheduleBackup(argv.cron, argv.dbType, config, argv.output);
     }
   )
-  .help()
-  .alias('help', 'h')
-  .version('1.0.0')
-  .alias('version', 'v')
-  .demandCommand(1, 'You need to specify at least one command before moving on.')
-  .epilog('Pralaya-DB: Reliable database backup and restore utility.')
-  .argv;
+  .demandCommand(1, "You must provide a valid command.")
+  .help().argv;

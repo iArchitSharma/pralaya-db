@@ -1,9 +1,8 @@
 import fs from "fs";
 import zlib from "zlib";
-import postgres from 'db/postgres';
+import postgres from './db/postgres.js';
 
 /**
- * Compresses a backup file using Gzip.
  * @param {string} filePath - Path of the file to be compressed.
  */
 
@@ -18,16 +17,18 @@ function compressBackup(filePath) {
     .pipe(writeStream)
     .on("finish", () => {
       console.log("Backup file compressed:", compressFP);
-      fs.unlinkSync(filePath);
+      fs.unlinkSync(filePath); // Remove the uncompressed backup file
+    })
+    .on("error", (err) => {
+      console.error("Error compressing backup file:", err.message);
     });
 }
 
 /**
- * @param {string} dbType - Type of the database (mysql, postgres, mongodb, sqlite).
+ * @param {string} dbType - Type of the database
  * @param {Object} config - Database connection parameters.
  * @param {string} outputFile - Path for the backup file.
  */
-
 function createBackup(dbType, config, outputFile) {
   switch (dbType.toLowerCase()) {
     case "mysql":
@@ -35,15 +36,11 @@ function createBackup(dbType, config, outputFile) {
       break;
 
     case "postgres":
-      postgres.createBackup(config, outputFile, () =>
-        compressBackup(outputFile)
-      );
+      postgres.createBackup(config, outputFile, () => compressBackup(outputFile));
       break;
 
     case "mongodb":
-      mongodb.createBackup(config, outputFile, () =>
-        compressBackup(outputFile)
-      );
+      mongodb.createBackup(config, outputFile, () => compressBackup(outputFile));
       break;
 
     case "sqlite":
@@ -55,6 +52,4 @@ function createBackup(dbType, config, outputFile) {
   }
 }
 
-export default {
-  createBackup
-};
+export { createBackup };

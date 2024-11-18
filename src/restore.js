@@ -1,10 +1,9 @@
 import fs from "fs";
 import zlib from "zlib";
-import postgres from 'db/postgres';
-const { logMessage, logError } = require("./utils/logger");
+import postgres from './db/postgres.js';
+import { logMessage, logError } from "./utils/logger.js";
 
 /**
- * Decompress a .gz file.
  * @param {string} filePath - Path to the compressed file.
  * @returns {Promise<string>} - Resolves with the path to the decompressed file.
  */
@@ -34,7 +33,20 @@ function decompressBackup(filePath) {
 }
 
 /**
- * @param {string} dbType - Type of the database (mysql, postgres, mongodb, sqlite).
+ * Deletes a file from the filesystem.
+ */
+function deleteFile(filePath) {
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      logError(`Error deleting file ${filePath}: ${err.message}`);
+    } else {
+      logMessage(`Decompressed file deleted: ${filePath}`);
+    }
+  });
+}
+
+/**
+ * @param {string} dbType - Type of the database.
  * @param {string} backupFile - Path to the backup file (compressed or uncompressed).
  * @param {Object} config - Database connection parameters.
  */
@@ -44,43 +56,19 @@ async function restoreBackup(dbType, backupFile, config) {
   
       switch (dbType.toLowerCase()) {
         case 'mysql':
-          mysql.restoreBackup(config, decompressedFile, (err) => {
-            if (err) {
-              logError(`MySQL restore failed: ${err.message}`);
-            } else {
-              logMessage('MySQL restore completed successfully.');
-            }
-          });
+          mysql.restoreBackup(config, decompressedFile, () => deleteFile(decompressedFile));
           break;
   
         case 'postgres':
-          postgres.restoreBackup(config, decompressedFile, (err) => {
-            if (err) {
-              logError(`PostgreSQL restore failed: ${err.message}`);
-            } else {
-              logMessage('PostgreSQL restore completed successfully.');
-            }
-          });
+          postgres.restoreBackup(config, decompressedFile, () => deleteFile(decompressedFile));
           break;
   
         case 'mongodb':
-          mongodb.restoreBackup(config, decompressedFile, (err) => {
-            if (err) {
-              logError(`MongoDB restore failed: ${err.message}`);
-            } else {
-              logMessage('MongoDB restore completed successfully.');
-            }
-          });
+          mongodb.restoreBackup(config, decompressedFile, () => deleteFile(decompressedFile));
           break;
   
         case 'sqlite':
-          sqlite.restoreBackup(config, decompressedFile, (err) => {
-            if (err) {
-              logError(`SQLite restore failed: ${err.message}`);
-            } else {
-              logMessage('SQLite restore completed successfully.');
-            }
-          });
+          sqlite.restoreBackup(config, decompressedFile, () => deleteFile(decompressedFile));
           break;
   
         default:
@@ -94,4 +82,4 @@ async function restoreBackup(dbType, backupFile, config) {
     }
   }
 
-  export default { restoreBackup };
+  export { restoreBackup };

@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "mysql2": "^3.11.4",
     "pg": "^8.13.1",
     "winston": "^3.17.0",
     "yargs": "^17.7.2",

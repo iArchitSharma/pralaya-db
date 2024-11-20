@@ -1,6 +1,7 @@
 import pkg from 'pg';
 const { Client } = pkg;
 import { spawn } from 'child_process';
+import { logMessage, logError } from "../utils/logger.js";
 
 /**
  * Test the connection to the PostgreSQL database.
@@ -10,9 +11,9 @@ async function testConn(config) {
   const client = new Client(config);
   try {
     await client.connect();
-    console.log('PostgreSQL connection successful.');
+    logMessage('PostgreSQL connection successful.');
   } catch (err) {
-    console.error('PostgreSQL connection failed:', err.message);
+    logError('PostgreSQL connection failed:', err.message);
   } finally {
     await client.end();
   }
@@ -25,7 +26,7 @@ async function testConn(config) {
 function createBackup(config, outputFile, callback) {
   const { host, port, user, password, database } = config;
 
-  console.log('Starting PostgreSQL backup...');
+  logMessage('Starting PostgreSQL backup...');
   const backupCommand = spawn('pg_dump', [
     '-h', host,
     '-p', port,
@@ -40,19 +41,19 @@ function createBackup(config, outputFile, callback) {
   });
 
   backupCommand.stdout.on('data', (data) => {
-    console.log(`Backup output: ${data}`);
+    logMessage(`Backup output: ${data}`);
   });
 
   backupCommand.stderr.on('data', (data) => {
-    console.error(`Backup error: ${data}`);
+    logError(`Backup error: ${data}`);
   });
 
   backupCommand.on('close', (code) => {
     if (code === 0) {
-      console.log('PostgreSQL backup successful:', outputFile);
+      logMessage('PostgreSQL backup successful:', outputFile);
       if(callback) callback();
     } else {
-      console.error(`Backup process exited with code ${code}`);
+      logError(`Backup process exited with code ${code}`);
     }
   });
 }
@@ -63,7 +64,7 @@ function createBackup(config, outputFile, callback) {
 function restoreBackup(config, backupFile, callback) {
   const { host, port, user, password, database } = config;
 
-  console.log('Starting PostgreSQL restore...');
+  logMessage('Starting PostgreSQL restore...');
   const restoreCommand = spawn('psql', [
     '-h', host,
     '-p', port,
@@ -78,19 +79,19 @@ function restoreBackup(config, backupFile, callback) {
   });
 
   restoreCommand.stdout.on('data', (data) => {
-    console.log(`Restore output: ${data}`);
+    logMessage(`Restore output: ${data}`);
   });
 
   restoreCommand.stderr.on('data', (data) => {
-    console.error(`Restore error: ${data}`);
+    logError(`Restore error: ${data}`);
   });
 
   restoreCommand.on('close', (code) => {
     if (code === 0) {
-      console.log('PostgreSQL restore successful.');
+      logMessage('PostgreSQL restore successful.');
       if(callback) callback();
     } else {
-      console.error(`Restore process exited with code ${code}`);
+      logError(`Restore process exited with code ${code}`);
     }
   });
 }

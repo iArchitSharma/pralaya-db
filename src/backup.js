@@ -2,6 +2,7 @@ import fs from "fs";
 import zlib from "zlib";
 import postgres from './db/postgres.js';
 import mysql from "./db/mysql.js";
+import sqlite from "./db/sqlite.js";
 
 /**
  * @param {string} filePath - Path of the file to be compressed.

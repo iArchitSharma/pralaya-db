@@ -2,3 +2,4 @@ node_modules/
 logs/
 backups/
 dbConfig.json
+test.db

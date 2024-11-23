@@ -3,6 +3,7 @@ import zlib from "zlib";
 import postgres from './db/postgres.js';
 import mysql from "./db/mysql.js";
 import sqlite from "./db/sqlite.js";
+import { logMessage, logError } from "./utils/logger.js";
 
 /**
  * @param {string} filePath - Path of the file to be compressed.
@@ -18,11 +19,11 @@ function compressBackup(filePath) {
     .pipe(gzip)
     .pipe(writeStream)
     .on("finish", () => {
-      console.log("Backup file compressed:", compressFP);
+      logMessage("Backup file compressed:", compressFP);
       fs.unlinkSync(filePath); // Remove the uncompressed backup file
     })
     .on("error", (err) => {
-      console.error("Error compressing backup file:", err.message);
+      logError("Error compressing backup file:", err.message);
     });
 }
 
@@ -50,7 +51,7 @@ function createBackup(dbType, config, outputFile) {
       break;
 
     default:
-      console.error(`Unsupported database type: ${dbType}`);
+      logError(`Unsupported database type: ${dbType}`);
   }
 }
 

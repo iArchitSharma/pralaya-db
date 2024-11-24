@@ -5,7 +5,7 @@ backup - node src/cli.js backup --dbType postgres --config ./dbConfig.json --out
 away make sure to create the database with same name before restoring data
 restore - node src/cli.js restore --dbType postgres --config ./dbConfig.json --backup ./backups/testdb_backup.sql.gz
 
-### dbConfig.json for mysql and postgres:
+### dbConfig.json for mysql and postgres and mongodb:
 
 ```
 {

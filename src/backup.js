@@ -3,6 +3,7 @@ import zlib from "zlib";
 import postgres from './db/postgres.js';
 import mysql from "./db/mysql.js";
 import sqlite from "./db/sqlite.js";
+import mongodb from "./db/mongodb.js";
 import { logMessage, logError } from "./utils/logger.js";
 
 /**

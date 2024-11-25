@@ -1,26 +1,76 @@
-Pralaya-DB is a solution designed for efficient and reliable database backup and recovery. It typically includes features that help automate backup processes, manage versions, ensure data integrity, and support various DBMSs.
 
-backup - node src/cli.js backup --dbType postgres --config ./dbConfig.json --output ./backups/testdb_backup.sql
+# Pralaya-DB
 
-away make sure to create the database with same name before restoring data
-restore - node src/cli.js restore --dbType postgres --config ./dbConfig.json --backup ./backups/testdb_backup.sql.gz
+**Pralaya-DB** is a robust solution for efficient and reliable database backup and recovery. It offers features to automate backup processes, manage versions, ensure data integrity, and support various database management systems (DBMSs).
 
-### dbConfig.json for mysql and postgres and mongodb:
+---
 
+## Features
+- Supports multiple DBMSs, including PostgreSQL, MySQL, MongoDB, and SQLite.
+- Automated backup and restoration.
+- Version management for backups.
+- Ensures data integrity during operations.
+
+---
+
+## Usage
+
+### Backup
+To create a backup of your database, use the following command:  
+```bash
+node src/cli.js backup --dbType <dbType> --config <path_to_config> --output <output_file_path>
 ```
+
+#### Example (PostgreSQL):
+```bash
+node src/cli.js backup --dbType postgres --config ./dbConfig.json --output ./backups/testdb_backup.sql
+```
+
+---
+
+### Restore
+**Note:** Ensure the database with the same name exists before restoring the data.
+
+To restore your database from a backup, use the following command:  
+```bash
+node src/cli.js restore --dbType <dbType> --config <path_to_config> --backup <backup_file_path>
+```
+
+#### Example (PostgreSQL):
+```bash
+node src/cli.js restore --dbType postgres --config ./dbConfig.json --backup ./backups/testdb_backup.sql.gz
+```
+
+---
+
+## Configuration Files
+
+### For MySQL, PostgreSQL, and MongoDB:
+Create a `dbConfig.json` file with the following structure:
+```json
 {
   "host": "localhost",
-  "port": port no.,
+  "port": <port_number>,
   "user": "root",
   "password": "yourpassword",
   "database": "dbName"
 }
 ```
 
-### dbConfig.json for sqlite:
-
-```
+### For SQLite:
+For SQLite databases, use this configuration:
+```json
 {
-    "databasePath": "./database/mydb.db"
+  "databasePath": "./database/mydb.db"
 }
 ```
+
+---
+
+## Notes
+- Ensure you have the necessary permissions and tools installed for the database you are working with.
+- The backup and restore operations may vary slightly based on the DBMS.
+
+Feel free to contribute or raise issues if you encounter any problems.
+
+---

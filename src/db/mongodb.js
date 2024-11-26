@@ -32,28 +32,32 @@ async function testConn(config){
 function createBackup(config, outputFile, callback) {
   const { host, port, database } = config;
 
-  // Construct connection string
   const connectionString = `mongodb://${host}:${port}/${database}`;
   console.log(`DEBUG: Running mongodump with --uri=${connectionString} --archive=${outputFile}`);
 
   logMessage('Starting MongoDB backup...');
-  
-  // Spawn the mongodump process
-  const backupCommand = spawn('mongodump', [
-    '--uri', connectionString,
-    '--archive', outputFile
-  ]);
 
-  // Log stdout and stderr for debugging
+  const backupCommand = spawn('mongodump', [
+    `--uri=${connectionString}`, 
+    `--archive=${outputFile}`  
+  ], { shell: true });
+
   backupCommand.stdout.on('data', (data) => {
     logMessage(`Backup stdout: ${data}`);
   });
 
   backupCommand.stderr.on('data', (data) => {
-    logError(`Backup stderr: ${data}`);
+    const message = data.toString().trim();
+  
+    // Check if the message is a known error pattern
+    if (message.toLowerCase().includes('error')) {
+      logError(`Backup stderr: ${message}`);
+    } else {
+      logMessage(`Backup info: ${message}`);
+    }
   });
+  
 
-  // Handle process exit
   backupCommand.on('close', (code) => {
     if (code === 0) {
       logMessage(`MongoDB backup completed successfully. File saved at: ${outputFile}`);
@@ -63,11 +67,11 @@ function createBackup(config, outputFile, callback) {
     }
   });
 
-  // Log process errors
   backupCommand.on('error', (error) => {
     logError(`Failed to start mongodump process: ${error.message}`);
   });
 }
+
 
 
   /**
@@ -81,7 +85,7 @@ function createBackup(config, outputFile, callback) {
       '--host', host,
       '--port', port,
       '--archive', backupFile,
-      '--db', database
+      '--nsInclude', database
     ]);
   
     restoreCommand.stdout.on('data', (data) => {

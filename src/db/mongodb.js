@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import { exec } from 'child_process';
 import { MongoClient } from 'mongodb';
 import { logMessage, logError } from "../utils/logger.js";
 
@@ -80,31 +81,46 @@ function createBackup(config, outputFile, callback) {
   function restoreBackup(config, backupFile, callback) {
     const { host, port, database } = config;
   
-    logMessage('Starting MongoDB restore...');
-    const restoreCommand = spawn('mongorestore', [
-      '--host', host,
-      '--port', port,
-      '--archive', backupFile,
-      '--nsInclude', database
-    ]);
+    logMessage("Starting MongoDB restore...");
+    const restoreCommand = `mongorestore --host=${host} --port=${port} --archive=${backupFile} --nsInclude=${database}.*`;
   
-    restoreCommand.stdout.on('data', (data) => {
-      logMessage(`Restore output: ${data}`);
+    logMessage(`Running restore command: ${restoreCommand}`);
+  
+    const restoreProcess = exec(restoreCommand, (error, stdout, stderr) => {
+      if (error) {
+        logError(`Restore process failed with error: ${error.message}`);
+        return;
+      }
+  
+      if (stderr) {
+        const lines = stderr.split("\n").filter((line) => line.trim());
+        lines.forEach((line) => {
+          if (line.includes("failed")) {
+            logError(`Restore error: ${line}`);
+          } else {
+            logMessage(`Restore progress: ${line}`);
+          }
+        });
+      }
+  
+      if (stdout) {
+        logMessage(`Restore output: ${stdout}`);
+      }
+  
+      logMessage("MongoDB restore successful.");
+      if (callback) callback();
     });
   
-    restoreCommand.stderr.on('data', (data) => {
-      logError(`Restore error: ${data}`);
-    });
-  
-    restoreCommand.on('close', (code) => {
+    restoreProcess.on("exit", (code) => {
       if (code === 0) {
-        logMessage('MongoDB restore successful.');
-        if (callback) callback();
+        logMessage("Restore process exited successfully.");
       } else {
         logError(`Restore process exited with code ${code}`);
       }
     });
   }
+  
+  
   
   export default {
     testConn,

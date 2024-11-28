@@ -1,13 +1,16 @@
 {
   "name": "pralaya-db",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/cli.js",
+  "bin": {
+    "pralaya-db": "./src/cli.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/cli.js"
   },
   "type": "module",
   "keywords": [],
-  "author": "",
+  "author": "Archit Sharma",
   "license": "ISC",
   "description": "",
   "dependencies": {
@@ -17,5 +20,17 @@
     "winston": "^3.17.0",
     "yargs": "^17.7.2",
     "zlib": "^1.0.5"
+  },
+  "pkg": {
+    "targets": [
+      "node18-win-x64",
+      "node18-linux-x64",
+      "node18-macos-x64"
+    ],
+    "outputPath": "./dist",
+    "scripts": "src/**/*.js"
+  },
+  "engines": {
+    "node": ">=16"
   }
 }

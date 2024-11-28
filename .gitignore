@@ -3,3 +3,4 @@ logs/*.log
 backups/
 dbConfig.json
 test.db
+dist/

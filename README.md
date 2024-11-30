@@ -74,3 +74,12 @@ For SQLite databases, use this configuration:
 Feel free to contribute or raise issues if you encounter any problems.
 
 ---
+
+Package the CLI as a Global Command
+Now you need to install your package globally so that users can access it from anywhere on their system.
+
+Run the following command to link your package globally:
+
+bash
+Copy code
+npm link

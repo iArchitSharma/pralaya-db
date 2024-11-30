@@ -21,16 +21,11 @@
     "yargs": "^17.7.2",
     "zlib": "^1.0.5"
   },
-  "pkg": {
-    "targets": [
-      "node18-win-x64",
-      "node18-linux-x64",
-      "node18-macos-x64"
-    ],
-    "outputPath": "./dist",
-    "scripts": "src/**/*.js"
+  "devDependencies": {
+    "esbuild": "^0.24.0"
   },
-  "engines": {
-    "node": ">=16"
+  "pkg": {
+    "scripts": ["dist/cli.js"],
+    "targets": ["node14-linux", "node14-macos", "node14-win"]
   }
 }

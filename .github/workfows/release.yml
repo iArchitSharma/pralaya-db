@@ -1,0 +1,51 @@
+name: Release Distributables
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # Trigger workflow on version tags (e.g., v1.0.0)
+
+jobs:
+  build-and-release:
+    name: Build and Release Distributables
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        platform: [linux, macos, windows]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build with pkg
+        run: |
+          npx pkg -t node18-${{ matrix.platform }} -o dist/pralaya-db-${{ matrix.platform }} .
+
+      - name: Create archive
+        run: |
+          mkdir -p artifacts
+          zip -r artifacts/pralaya-db-${{ matrix.platform }}.zip dist/pralaya-db-${{ matrix.platform }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pralaya-db-${{ matrix.platform }}
+          path: artifacts/pralaya-db-${{ matrix.platform }}.zip
+
+      - name: Create GitHub Release
+        uses: actions/upload-release-asset@v1
+        if: github.event_name == 'push'
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: artifacts/pralaya-db-${{ matrix.platform }}.zip
+          asset_name: pralaya-db-${{ matrix.platform }}.zip
+          asset_content_type: application/zip

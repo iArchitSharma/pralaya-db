@@ -61,7 +61,7 @@ Create a `dbConfig.json` file with the following structure:
 For SQLite databases, use this configuration:
 ```json
 {
-  "databasePath": "./database/mydb.db"
+  "databasePath": "./mydatabase.db"
 }
 ```
 

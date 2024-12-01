@@ -32,6 +32,9 @@ jobs:
         run: |
           ls -lh dist/
 
+      - name: Ensure artifacts directory exists
+        run: mkdir -p artifacts
+
       - name: Compress Windows executable
         run: |
           if [ -f dist/pralaya-db-windows.exe ]; then

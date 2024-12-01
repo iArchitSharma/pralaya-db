@@ -29,7 +29,13 @@ jobs:
         run: npx pkg -t node18-macos-x64 -o dist/pralaya-db-macos dist/cli.cjs
 
       - name: Compress Windows executable
-        run: zip -r artifacts/pralaya-db-windows.zip dist/pralaya-db-windows.exe
+        run: |
+          if [ -f dist/pralaya-db-windows.exe ]; then
+            zip -r artifacts/pralaya-db-windows.zip dist/pralaya-db-windows.exe
+          else
+            echo "Windows executable not found. Skipping compression."
+            exit 1
+          fi
 
       - name: Compress Linux executable
         run: zip -r artifacts/pralaya-db-linux.zip dist/pralaya-db-linux

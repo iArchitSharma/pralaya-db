@@ -19,10 +19,6 @@ jobs:
       - name: Build with esbuild
         run: node esbuild.config.js
 
-      - name: Debug dist directory
-        run: |
-          ls -lh dist/
-
       - name: Package for Windows
         run: npx pkg -t node18-win-x64 -o dist/pralaya-db-windows dist/cli.cjs
 
@@ -31,6 +27,10 @@ jobs:
 
       - name: Package for macOS
         run: npx pkg -t node18-macos-x64 -o dist/pralaya-db-macos dist/cli.cjs
+
+      - name: Debug dist directory
+        run: |
+          ls -lh dist/
 
       - name: Compress Windows executable
         run: |

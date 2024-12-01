@@ -1,60 +1,43 @@
-name: Release
+name: Build and Release
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*' # Trigger workflow on version tags (e.g., v1.0.0)
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Build with esbuild
-        run: node esbuild.config.js
-
-      - name: Package for Windows
-        run: npx pkg -t node18-win-x64 -o dist/pralaya-db-windows dist/cli.cjs
-
-      - name: Package for Linux
-        run: npx pkg -t node18-linux-x64 -o dist/pralaya-db-linux dist/cli.cjs
-
-      - name: Package for macOS
-        run: npx pkg -t node18-macos-x64 -o dist/pralaya-db-macos dist/cli.cjs
-
-      - name: Debug dist directory
+      - name: Build executables
         run: |
-          ls -lh dist/
+          node esbuild.config.js
+          npx pkg --targets node18-linux -o dist/pralaya-db-linux dist/cli.cjs
+          npx pkg --targets node18-macos -o dist/pralaya-db-macos dist/cli.cjs
+          npx pkg --targets node18-windows -o dist/pralaya-db-windows.exe dist/cli.cjs
 
-      - name: Ensure artifacts directory exists
+      - name: Create artifacts directory
         run: mkdir -p artifacts
 
-      - name: Compress Windows executable
+      - name: Compress executables
         run: |
-          if [ -f dist/pralaya-db-windows.exe ]; then
-            zip -r artifacts/pralaya-db-windows.zip dist/pralaya-db-windows.exe
-          else
-            echo "Windows executable not found. Skipping compression."
-            exit 1
-          fi
+          zip -r artifacts/pralaya-db-linux.zip dist/pralaya-db-linux
+          zip -r artifacts/pralaya-db-macos.zip dist/pralaya-db-macos
+          zip -r artifacts/pralaya-db-windows.zip dist/pralaya-db-windows.exe
 
-      - name: Compress Linux executable
-        run: zip -r artifacts/pralaya-db-linux.zip dist/pralaya-db-linux
-
-      - name: Compress macOS executable
-        run: zip -r artifacts/pralaya-db-macos.zip dist/pralaya-db-macos
-
-      - name: Upload release artifacts
-        uses: actions/upload-artifact@v3
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: pralaya-db-executables
-          path: |
-            artifacts/pralaya-db-windows.zip
+          files: |
             artifacts/pralaya-db-linux.zip
             artifacts/pralaya-db-macos.zip
+            artifacts/pralaya-db-windows.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

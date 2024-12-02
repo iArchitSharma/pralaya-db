@@ -23,11 +23,27 @@ async function testConn(config) {
  * @param {string} outputFile - Path for the backup file.
  * @param {Function} callback - Callback function to execute after the backup is complete.
  */
-function createBackup(config, outputFile, callback) {
+function createBackup(config, outputFile, callback, backupType) {
   const { host, port, user, password, database } = config;
 
-  logMessage('Starting PostgreSQL backup...');
-  const backupCommand = spawn('pg_dump', [
+  logMessage('Starting PostgreSQL ${backupType} backup...');
+
+  let backupCommand;
+
+  switch (backupFile.toLowerCase()){
+    case 'full':
+
+      break;
+
+    case 'incremental':
+      
+      break;
+
+    case 'incremental':
+      
+      break;
+  }
+  backupCommand = spawn('pg_dump', [
     '-h', host,
     '-p', port,
     '-U', user,

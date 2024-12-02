@@ -34,13 +34,18 @@ yargs(hideBin(process.argv))
         .option("output", {
           describe: "Path for the backup file",
           demandOption: true,
+        })
+        .option("backupType", {
+          describe: "Type of backup (full, incremental, differential)",
+          choices: ["full", "incremental", "differential"],
+          default: "full",
         });
     },
     async (argv) => {
       try {
         const config = loadConfig(argv.config);
-        await createBackup(argv.dbType, config, argv.output);
-        logMessage(`Backup started for ${argv.dbType} database.`);
+        await createBackup(argv.dbType, config, argv.output, argv.backupType);
+        logMessage(`Backup (${argv.backupType}) started for ${argv.dbType} database.`);
       } catch (err) {
         logError(err);
       }

@@ -32,29 +32,43 @@ function createBackup(config, outputFile, callback, backupType) {
 
   switch (backupFile.toLowerCase()){
     case 'full':
-
+      backupCommand = spawn('pg_dump', [
+        '-h', host,
+        '-p', port,
+        '-U', user,
+        '-d', database,
+        '-f', outputFile
+      ], {
+        env: {
+          ...process.env, // Preserve existing environment variables
+          PGPASSWORD: password
+        }
+      });
       break;
 
     case 'incremental':
+      backupCommand = spawn("pg_basebackup", [
+        "-h",
+        host,
+        "-p",
+        port,
+        "-U",
+        user,
+        "-D",
+        outputFile,
+        "--wal-method=stream", // Include WAL files for incremental restore
+      ]);
+      break;
+
+    case 'differential':
       
       break;
 
-    case 'incremental':
-      
-      break;
+    default:
+      logError(`Invalid backup type: ${backupType}`);
+      return;
   }
-  backupCommand = spawn('pg_dump', [
-    '-h', host,
-    '-p', port,
-    '-U', user,
-    '-d', database,
-    '-f', outputFile
-  ], {
-    env: {
-      ...process.env, // Preserve existing environment variables
-      PGPASSWORD: password
-    }
-  });
+  
 
   backupCommand.stdout.on('data', (data) => {
     logMessage(`Backup output: ${data}`);

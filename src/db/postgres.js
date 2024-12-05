@@ -23,22 +23,52 @@ async function testConn(config) {
  * @param {string} outputFile - Path for the backup file.
  * @param {Function} callback - Callback function to execute after the backup is complete.
  */
-function createBackup(config, outputFile, callback) {
+function createBackup(config, outputFile, callback, backupType) {
   const { host, port, user, password, database } = config;
 
-  logMessage('Starting PostgreSQL backup...');
-  const backupCommand = spawn('pg_dump', [
-    '-h', host,
-    '-p', port,
-    '-U', user,
-    '-d', database,
-    '-f', outputFile
-  ], {
-    env: {
-      ...process.env, // Preserve existing environment variables
-      PGPASSWORD: password
-    }
-  });
+  logMessage(`Starting PostgreSQL ${backupType} backup...`);
+
+  let backupCommand;
+
+  switch (backupType.toLowerCase()){
+    case 'full':
+      backupCommand = spawn('pg_dump', [
+        '-h', host,
+        '-p', port,
+        '-U', user,
+        '-d', database,
+        '-f', outputFile
+      ], {
+        env: {
+          ...process.env, // Preserve existing environment variables
+          PGPASSWORD: password
+        }
+      });
+      break;
+
+    case 'incremental':
+      backupCommand = spawn("pg_basebackup", [
+        "-h",
+        host,
+        "-p",
+        port,
+        "-U",
+        user,
+        "-D",
+        outputFile,
+        "--wal-method=stream", // Include WAL files for incremental restore
+      ]);
+      break;
+
+    case 'differential':
+      logError("Differential backups are not natively supported with Postgres.");
+      break;
+
+    default:
+      logError(`Invalid backup type: ${backupType}`);
+      return;
+  }
+  
 
   backupCommand.stdout.on('data', (data) => {
     logMessage(`Backup output: ${data}`);
@@ -51,7 +81,7 @@ function createBackup(config, outputFile, callback) {
   backupCommand.on('close', (code) => {
     if (code === 0) {
       logMessage('PostgreSQL backup successful:', outputFile);
-      if(callback) callback();
+      if(callback&&backupType=="full") callback();
     } else {
       logError(`Backup process exited with code ${code}`);
     }

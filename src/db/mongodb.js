@@ -30,7 +30,7 @@ async function testConn(config){
  * @param {Function} callback - Callback function to execute after the backup is complete.
  */
 
-function createBackup(config, outputFile, callback) {
+function createBackup(config, outputFile, callback, backupType) {
   const { host, port, database } = config;
 
   const connectionString = `mongodb://${host}:${port}/${database}`;

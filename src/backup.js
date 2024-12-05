@@ -33,22 +33,22 @@ function compressBackup(filePath) {
  * @param {Object} config - Database connection parameters.
  * @param {string} outputFile - Path for the backup file.
  */
-function createBackup(dbType, config, outputFile) {
+function createBackup(dbType, config, outputFile, backupType) {
   switch (dbType.toLowerCase()) {
     case "mysql":
-      mysql.createBackup(config, outputFile, () => compressBackup(outputFile));
+      mysql.createBackup(config, outputFile, () => compressBackup(outputFile), backupType);
       break;
 
     case "postgres":
-      postgres.createBackup(config, outputFile, () => compressBackup(outputFile));
+      postgres.createBackup(config, outputFile, () => compressBackup(outputFile), backupType);
       break;
 
     case "mongodb":
-      mongodb.createBackup(config, outputFile, () => compressBackup(outputFile));
+      mongodb.createBackup(config, outputFile, () => compressBackup(outputFile), backupType);
       break;
 
     case "sqlite":
-      sqlite.createBackup(config, outputFile, () => compressBackup(outputFile));
+      sqlite.createBackup(config, outputFile, () => compressBackup(outputFile), backupType);
       break;
 
     default:

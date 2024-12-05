@@ -25,7 +25,7 @@ async function testConn(config){
  * @param {Function} callback - Callback function to execute after the backup is complete.
  */
 
-function createBackup(config, outputFile, callback) {
+function createBackup(config, outputFile, callback, backupType) {
     const { databasePath } = config;
   
     logMessage('Starting SQLite backup...');

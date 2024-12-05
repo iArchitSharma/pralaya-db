@@ -26,11 +26,11 @@ async function testConn(config) {
 function createBackup(config, outputFile, callback, backupType) {
   const { host, port, user, password, database } = config;
 
-  logMessage('Starting PostgreSQL ${backupType} backup...');
+  logMessage(`Starting PostgreSQL ${backupType} backup...`);
 
   let backupCommand;
 
-  switch (backupFile.toLowerCase()){
+  switch (backupType.toLowerCase()){
     case 'full':
       backupCommand = spawn('pg_dump', [
         '-h', host,
@@ -61,7 +61,7 @@ function createBackup(config, outputFile, callback, backupType) {
       break;
 
     case 'differential':
-      
+      logError("Differential backups are not natively supported with Postgres.");
       break;
 
     default:
@@ -81,7 +81,7 @@ function createBackup(config, outputFile, callback, backupType) {
   backupCommand.on('close', (code) => {
     if (code === 0) {
       logMessage('PostgreSQL backup successful:', outputFile);
-      if(callback) callback();
+      if(callback&&backupType=="full") callback();
     } else {
       logError(`Backup process exited with code ${code}`);
     }

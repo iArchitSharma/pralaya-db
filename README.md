@@ -33,12 +33,12 @@ node src/cli.js backup --dbType postgres --config ./dbConfig.json --output ./bac
 
 To restore your database from a backup, use the following command:  
 ```bash
-node src/cli.js restore --dbType <dbType> --config <path_to_config> --backup <backup_file_path>
+node src/cli.js restore --dbType <dbType> --config <path_to_config> --backup <backup_file_path> --backupType <type_of_backup>
 ```
 
 #### Example (PostgreSQL):
 ```bash
-node src/cli.js restore --dbType postgres --config ./dbConfig.json --backup ./backups/testdb_backup.sql.gz
+node src/cli.js restore --dbType postgres --config ./dbConfig.json --backup ./backups/testdb_backup.sql.gz --backupType incremental
 ```
 
 ---

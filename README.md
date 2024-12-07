@@ -80,6 +80,6 @@ Now you need to install your package globally so that users can access it from a
 
 Run the following command to link your package globally:
 
-bash
+```bash
 Copy code
-npm link
+npm link```

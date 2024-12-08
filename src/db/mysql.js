@@ -26,7 +26,11 @@ function createBackup(config, outputFile, callback, backupType){
     const { host, port, user, password, database } = config;
     logMessage('Starting MySQL backup...');
 
-    const backupCommand = spawn('mysqldump', [
+    let backupCommand;
+
+  switch (backupType.toLowerCase()){
+    case 'full':
+      backupCommand = spawn('mysqldump', [
         '-h', host,
         '-P', port,
         '-u', user,
@@ -34,6 +38,20 @@ function createBackup(config, outputFile, callback, backupType){
         database,
         '-r', outputFile,
       ]);
+      break;
+
+    case 'incremental':
+      
+      break;
+
+    case 'differential':
+      logError("Differential backups are not natively supported with Postgres.");
+      break;
+
+    default:
+      logError(`Invalid backup type: ${backupType}`);
+      return;
+  }
 
       backupCommand.stdout.on('data', (data) => {
         logMessage(`Backup output: ${data}`);

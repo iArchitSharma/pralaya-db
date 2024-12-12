@@ -41,6 +41,11 @@ node src/cli.js restore --dbType <dbType> --config <path_to_config> --backup <ba
 node src/cli.js restore --dbType postgres --config ./dbConfig.json --backup ./backups/testdb_backup.sql.gz --backupType incremental
 ```
 
+#### Example Incremental backup(mySQL):
+```
+node src/cli.js backup --dbType mysql --config ./dbConfig.json --output ./backups/mysql-backup --backupType incremental
+```
+
 ---
 
 ## Configuration Files

@@ -29,7 +29,25 @@ function createBackup(config, outputFile, callback, backupType) {
     const { databasePath } = config;
   
     logMessage('Starting SQLite backup...');
-    const backupCommand = spawn('sqlite3', [databasePath, `.backup '${outputFile}'`]);
+    let backupCommand;
+
+    switch (backupType.toLowerCase()) {
+      case "full":
+        backupCommand = spawn('sqlite3', [databasePath, `.backup '${outputFile}'`]);
+        break;
+  
+      case "incremental":
+        
+        break;
+  
+      case "differential":
+        
+        break;
+  
+      default:
+        logError(`Invalid backup type: ${backupType}`);
+        return;
+    }
   
     backupCommand.stdout.on('data', (data) => {
       logMessage(`Backup output: ${data}`);

@@ -20,6 +20,40 @@ async function testConn(config){
     }
 }
 
+function createIncrementalBackup(config, outputDir, callback) {
+  const { databasePath } = config;
+
+  try {
+    const dbDir = path.dirname(databasePath);
+    const dbName = path.basename(databasePath);
+    const walFile = path.join(dbDir, `${dbName}-wal`);
+    const backupDbFile = path.join(outputDir, `${dbName}`);
+    const backupWalFile = path.join(outputDir, `${dbName}-wal`);
+
+    logMessage('Starting SQLite incremental backup...');
+
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    fs.copyFileSync(databasePath, backupDbFile);
+    logMessage(`Copied main database file to: ${backupDbFile}`);
+
+    if (fs.existsSync(walFile)) {
+      fs.copyFileSync(walFile, backupWalFile);
+      logMessage(`Copied WAL file to: ${backupWalFile}`);
+    } else {
+      logMessage('No WAL file found. Database changes are fully committed.');
+    }
+
+    if (callback) callback();
+  } catch (err) {
+    logError('Error during SQLite incremental backup:', err.message);
+    if (callback) callback(err);
+  }
+}
+
+
 /**
  * @param {string} outputFile - Backup file path.
  * @param {Function} callback - Callback function to execute after the backup is complete.
@@ -37,7 +71,7 @@ function createBackup(config, outputFile, callback, backupType) {
         break;
   
       case "incremental":
-        
+        createIncrementalBackup(config, outputFile, callback);
         break;
   
       case "differential":

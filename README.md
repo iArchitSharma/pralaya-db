@@ -46,6 +46,11 @@ node src/cli.js restore --dbType postgres --config ./dbConfig.json --backup ./ba
 node src/cli.js backup --dbType mysql --config ./dbConfig.json --output ./backups/mysql-backup --backupType incremental
 ```
 
+#### Example Decremental backup(mySQL):
+```
+node src/cli.js backup --dbType mysql --config ./dbConfig.json --output ./backups/mysql-backup --backupType decremental
+```
+
 ---
 
 ## Configuration Files
